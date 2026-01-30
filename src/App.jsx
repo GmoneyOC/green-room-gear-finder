@@ -199,7 +199,7 @@ const App = () => {
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
-              <Mountain className="w-20 h-20" />
+              <img src="/logo.png" alt="Green Room Gear Finder" className="w-24 h-24 object-contain" />
             </div>
             <h1 className="text-5xl font-bold mb-4">Find Your Perfect Ride</h1>
             <p className="text-xl text-blue-100 mb-8">
