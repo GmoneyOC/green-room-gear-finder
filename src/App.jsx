@@ -198,8 +198,8 @@ const App = () => {
         <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm"></div>
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center mb-12">
-            <div className="flex justify-center mb-6">
-              <img src="/logo.png" alt="Green Room Gear Finder" className="w-100 h-100 object-contain" />
+            <div className="flex justify-center mb-3">
+              <img src="/logo.png" alt="Green Room Gear Finder" className="w-24 h-24 object-contain" />
             </div>
             <h1 className="text-5xl font-bold mb-4">Find Your Perfect Ride</h1>
             <p className="text-xl text-blue-100 mb-8">
