@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Mountain, Award, TrendingUp, DollarSign } from 'lucide-react';
+import { ChevronRight, Mountain, Award, TrendingUp, DollarSign, ExternalLink } from 'lucide-react';
 
 const App = () => {
   const [step, setStep] = useState('landing');
@@ -53,42 +53,58 @@ const App = () => {
     if (sport === 'Snowboarding') {
       return [
         {
-          name: 'Burton Custom 2026',
+          name: 'Burton Custom Camber',
           category: 'All-Mountain Snowboard',
-          price: '$549.95',
-          image: image: 'https://cdn.shopify.com/s/files/1/0019/1451/7627/files/106881_Jungle_2.jpg?v=1726166934',
-          specs: '156cm • Directional • Medium Flex',
-          reason: 'Perfect all-mountain board for progressive riders. The Custom offers versatility across all terrain with a playful feel.',
+          price: '$679.95',
+          image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=600&fit=crop&q=80',
+          specs: '156cm • Directional Twin • Medium Flex',
+          stiffness: '6/10',
+          styleRating: 'All-Mountain: 9/10 | Freestyle: 7/10',
+          terrain: 'Best for groomers, powder, park',
+          reason: 'The most iconic all-mountain board since 1996. Perfect balance of power and playfulness with traditional camber for precise edge control and explosive pop.',
+          productLink: 'https://www.evo.com/snowboards/burton-custom-snowboard',
           affiliate: 'https://affiliate-link-1.com',
           featured: level?.includes('Intermediate') || level?.includes('Advanced')
         },
         {
           name: 'Capita DOA',
           category: 'Freestyle Snowboard',
-          price: '$499.95',
-          image: 'https://cdn.shopify.com/s/files/1/1338/8133/files/DOA_W26_TOPSHEET_WEB.png?v=1725568627',
-          specs: '154cm • Twin • Medium Flex',
-          reason: 'Ideal for park and all-mountain freestyle. Known for its pop and buttery feel.',
+          price: '$589.95',
+          image: 'https://images.unsplash.com/photo-1519315901367-a3dfe6b30043?w=600&h=600&fit=crop&q=80',
+          specs: '154cm • True Twin • Medium Flex',
+          stiffness: '5/10',
+          styleRating: 'Freestyle: 10/10 | All-Mountain: 8/10',
+          terrain: 'Park, rails, jumps, all-mountain',
+          reason: 'Award-winning freestyle legend. Ultra-light P2 core with explosive pop. Seven-time Transworld Good Wood winner for park domination.',
+          productLink: 'https://www.evo.com/snowboards/capita-doa-snowboard',
           affiliate: 'https://affiliate-link-2.com',
           featured: style?.includes('Freestyle')
         },
         {
-          name: 'Jones Explorer',
+          name: 'Jones Explorer Split',
           category: 'Splitboard',
-          price: '$749.95',
-          image: 'https://www.evo.com/imgp/1500/235961/985788/jones-explorer-splitboard-2024-.jpg',
-          specs: '158cm • Directional • Stiff Flex',
-          reason: 'Built for backcountry adventures. Floats in powder and handles technical terrain.',
+          price: '$849.95',
+          image: 'https://images.unsplash.com/photo-1583792986380-e8694c770e46?w=600&h=600&fit=crop&q=80',
+          specs: '161cm • Directional • Stiff Flex',
+          stiffness: '8/10',
+          styleRating: 'Backcountry: 10/10 | Powder: 9/10',
+          terrain: 'Backcountry, powder, technical terrain',
+          reason: 'Built for backcountry exploration. Directional shape floats effortlessly in powder while maintaining edge hold on firm snow. Eco-friendly construction.',
+          productLink: 'https://www.evo.com/splitboards/jones-explorer-split-splitboard',
           affiliate: 'https://affiliate-link-3.com',
           featured: style?.includes('Powder') || answers.terrain?.includes('Backcountry')
         },
         {
           name: 'Ride Twinpig',
           category: 'All-Mountain Snowboard',
-          price: '$399.95',
-          image: 'https://www.evo.com/imgp/1500/214894/785885/ride-twinpig-snowboard-2024-.jpg',
-          specs: '148cm • Twin • Medium Flex',
-          reason: 'Great value board with a wide platform for stability. Perfect for learning and progression.',
+          price: '$449.95',
+          image: 'https://images.unsplash.com/photo-1593016540846-8e1a724e7089?w=600&h=600&fit=crop&q=80',
+          specs: '151cm • Twin • Soft-Medium Flex',
+          stiffness: '4/10',
+          styleRating: 'Beginner-Friendly: 10/10 | Playful: 9/10',
+          terrain: 'All conditions, perfect for progression',
+          reason: 'Wide platform for incredible stability. Perfect for learning and progression with forgiving flex. Volume-shifted design means ride shorter for better maneuverability.',
+          productLink: 'https://www.evo.com/snowboards/ride-twinpig-snowboard',
           affiliate: 'https://affiliate-link-4.com',
           featured: level?.includes('Beginner') || budget?.includes('Under $300') || budget?.includes('$300 - $500')
         }
@@ -96,42 +112,58 @@ const App = () => {
     } else {
       return [
         {
-          name: 'Rossignol Experience 88',
+          name: 'Rossignol Experience 88 Ti',
           category: 'All-Mountain Skis',
-          price: '$599.95',
-          image: 'https://www.evo.com/imgp/1500/235682/987445/rossignol-experience-88-ti-skis-2025-.jpg',
-          specs: '172cm • 88mm Waist • Medium Flex',
-          reason: 'Versatile all-mountain ski that excels on groomed runs and handles light powder well.',
+          price: '$749.95',
+          image: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?w=600&h=600&fit=crop&q=80',
+          specs: '172cm • 88mm Waist • Medium-Stiff',
+          stiffness: '7/10',
+          styleRating: 'All-Mountain: 9/10 | Groomer: 10/10',
+          terrain: 'Groomers, bumps, light powder',
+          reason: 'Versatile powerhouse with titanal construction. Exceptional edge grip on hardpack with enough width to handle variable conditions. Smooth, damp, confidence-inspiring.',
+          productLink: 'https://www.evo.com/skis/rossignol-experience-88-ti',
           affiliate: 'https://affiliate-link-5.com',
           featured: level?.includes('Intermediate') || level?.includes('Advanced')
         },
         {
           name: 'Armada ARV 96',
           category: 'Freestyle Skis',
-          price: '$549.95',
-          image: 'https://www.evo.com/imgp/1500/229956/963574/armada-arv-96-skis-2025-.jpg',
-          specs: '177cm • 96mm Waist • Twin Tip',
-          reason: 'Perfect park ski with all-mountain capability. Playful and poppy for tricks and jumps.',
+          price: '$649.95',
+          image: 'https://images.unsplash.com/photo-1551524164-687a55dd1126?w=600&h=600&fit=crop&q=80',
+          specs: '177cm • 96mm Waist • Medium Flex',
+          stiffness: '5/10',
+          styleRating: 'Freestyle: 10/10 | Park: 9/10',
+          terrain: 'Park, powder, all-mountain',
+          reason: 'The ultimate playful twin tip. Poppy ash core for endless butter tricks. Equally at home stomping jumps or slashing powder. True twin shape rides switch perfectly.',
+          productLink: 'https://www.evo.com/skis/armada-arv-96',
           affiliate: 'https://affiliate-link-6.com',
           featured: style?.includes('Freestyle')
         },
         {
-          name: 'K2 Mindbender 108',
+          name: 'K2 Mindbender 108Ti',
           category: 'Freeride Skis',
-          price: '$749.95',
-          image: 'https://www.evo.com/imgp/1500/235706/987702/k2-mindbender-108-skis-2025-.jpg',
+          price: '$849.95',
+          image: 'https://images.unsplash.com/photo-1609595363415-e3d5e1f0a4c7?w=600&h=600&fit=crop&q=80',
           specs: '184cm • 108mm Waist • Stiff Flex',
-          reason: 'Built for powder and big mountain riding. Floats effortlessly in deep snow.',
+          stiffness: '8/10',
+          styleRating: 'Powder: 10/10 | Big Mountain: 9/10',
+          terrain: 'Deep snow, steeps, backcountry',
+          reason: 'Big mountain destroyer. 108mm waist provides effortless float in powder. Titanal Y-beam construction delivers power and stability at speed without the weight penalty.',
+          productLink: 'https://www.evo.com/skis/k2-mindbender-108ti',
           affiliate: 'https://affiliate-link-7.com',
           featured: style?.includes('Powder') || answers.terrain?.includes('Backcountry')
         },
         {
           name: 'Blizzard Brahma 82',
           category: 'Carving Skis',
-          price: '$499.95',
-          image: 'https://www.evo.com/imgp/1500/235643/986891/blizzard-brahma-82-skis-2025-.jpg',
+          price: '$599.95',
+          image: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?w=600&h=600&fit=crop&q=80',
           specs: '174cm • 82mm Waist • Stiff Flex',
-          reason: 'Excellent groomer ski with precise edge control. Perfect for carving turns at speed.',
+          stiffness: '8/10',
+          styleRating: 'Carving: 10/10 | Groomer: 10/10',
+          terrain: 'Groomers, hardpack, fast turns',
+          reason: 'Precision carving machine. Two sheets of titanal provide unmatched edge hold and stability. Perfect for ripping high-speed arcs on firm snow. Confidence at any speed.',
+          productLink: 'https://www.evo.com/skis/blizzard-brahma-82',
           affiliate: 'https://affiliate-link-8.com',
           featured: style?.includes('Carving') || answers.terrain?.includes('Resort')
         }
@@ -278,7 +310,7 @@ const App = () => {
               <div className="grid md:grid-cols-3 gap-6">
                 {topPicks.map((product, index) => (
                   <div key={index} className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl transform hover:scale-105 transition-all">
-                    <div className="h-64 overflow-hidden">
+                    <div className="h-64 overflow-hidden bg-gray-100">
                       <img 
                         src={product.image} 
                         alt={product.name}
@@ -289,16 +321,41 @@ const App = () => {
                       <div className="text-sm text-blue-600 font-semibold mb-1">{product.category}</div>
                       <h3 className="text-xl font-bold mb-2">{product.name}</h3>
                       <p className="text-2xl font-bold text-blue-600 mb-3">{product.price}</p>
-                      <p className="text-sm text-gray-600 mb-3">{product.specs}</p>
-                      <p className="text-sm text-gray-700 mb-4">{product.reason}</p>
-                      <a
-                        href={product.affiliate}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-semibold transition-colors"
-                      >
-                        Check Price →
-                      </a>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="text-xs font-semibold text-gray-600">SPECS</div>
+                        <p className="text-sm text-gray-700">{product.specs}</p>
+                        <div className="flex gap-4 text-xs">
+                          <span className="bg-gray-100 px-2 py-1 rounded">Stiffness: {product.stiffness}</span>
+                        </div>
+                        <div className="text-xs text-gray-600 mt-2">
+                          <strong>Best For:</strong> {product.terrain}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {product.styleRating}
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 mb-4 leading-relaxed">{product.reason}</p>
+                      
+                      <div className="space-y-2">
+                        <a
+                          href={product.affiliate}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-semibold transition-colors"
+                        >
+                          Buy Now →
+                        </a>
+                        <a
+                          href={product.productLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          Full Product Details <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -312,7 +369,7 @@ const App = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {otherOptions.map((product, index) => (
                   <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex gap-4">
-                    <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/20">
                       <img 
                         src={product.image} 
                         alt={product.name}
@@ -323,15 +380,26 @@ const App = () => {
                       <div className="text-sm text-blue-200 mb-1">{product.category}</div>
                       <h3 className="text-xl font-bold mb-2">{product.name}</h3>
                       <p className="text-lg font-bold text-yellow-300 mb-2">{product.price}</p>
-                      <p className="text-sm text-blue-100 mb-3">{product.specs}</p>
-                      <a
-                        href={product.affiliate}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-                      >
-                        View Details →
-                      </a>
+                      <p className="text-xs text-blue-100 mb-1">{product.specs}</p>
+                      <p className="text-xs text-blue-200 mb-3">Stiffness: {product.stiffness}</p>
+                      <div className="flex gap-2">
+                        <a
+                          href={product.affiliate}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                        >
+                          Buy Now →
+                        </a>
+                        <a
+                          href={product.productLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-200 hover:text-white transition-colors px-2"
+                        >
+                          Details <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
