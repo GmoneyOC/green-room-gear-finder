@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronRight, Mountain, Award, TrendingUp, DollarSign } from 'lucide-react';
 
 const App = () => {
-  const [step, setStep] = useState('landing'); // landing, questionnaire, results
+  const [step, setStep] = useState('landing');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
 
@@ -56,7 +56,7 @@ const App = () => {
           name: 'Burton Custom',
           category: 'All-Mountain Snowboard',
           price: '$549.95',
-          image: '🏂',
+          image: 'https://images.unsplash.com/photo-1593016540846-8e1a724e7089?w=400&h=400&fit=crop',
           specs: '156cm • Directional • Medium Flex',
           reason: 'Perfect all-mountain board for progressive riders. The Custom offers versatility across all terrain with a playful feel.',
           affiliate: 'https://affiliate-link-1.com',
@@ -66,7 +66,7 @@ const App = () => {
           name: 'Capita DOA',
           category: 'Freestyle Snowboard',
           price: '$499.95',
-          image: '🎿',
+          image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop',
           specs: '154cm • Twin • Medium Flex',
           reason: 'Ideal for park and all-mountain freestyle. Known for its pop and buttery feel.',
           affiliate: 'https://affiliate-link-2.com',
@@ -76,7 +76,7 @@ const App = () => {
           name: 'Jones Explorer',
           category: 'Splitboard',
           price: '$749.95',
-          image: '⛰️',
+          image: 'https://images.unsplash.com/photo-1583792986380-e8694c770e46?w=400&h=400&fit=crop',
           specs: '158cm • Directional • Stiff Flex',
           reason: 'Built for backcountry adventures. Floats in powder and handles technical terrain.',
           affiliate: 'https://affiliate-link-3.com',
@@ -86,7 +86,7 @@ const App = () => {
           name: 'Ride Twinpig',
           category: 'All-Mountain Snowboard',
           price: '$399.95',
-          image: '🐷',
+          image: 'https://images.unsplash.com/photo-1519315901367-a3dfe6b30043?w=400&h=400&fit=crop',
           specs: '148cm • Twin • Medium Flex',
           reason: 'Great value board with a wide platform for stability. Perfect for learning and progression.',
           affiliate: 'https://affiliate-link-4.com',
@@ -99,7 +99,7 @@ const App = () => {
           name: 'Rossignol Experience 88',
           category: 'All-Mountain Skis',
           price: '$599.95',
-          image: '⛷️',
+          image: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?w=400&h=400&fit=crop',
           specs: '172cm • 88mm Waist • Medium Flex',
           reason: 'Versatile all-mountain ski that excels on groomed runs and handles light powder well.',
           affiliate: 'https://affiliate-link-5.com',
@@ -109,7 +109,7 @@ const App = () => {
           name: 'Armada ARV 96',
           category: 'Freestyle Skis',
           price: '$549.95',
-          image: '🎪',
+          image: 'https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=400&fit=crop',
           specs: '177cm • 96mm Waist • Twin Tip',
           reason: 'Perfect park ski with all-mountain capability. Playful and poppy for tricks and jumps.',
           affiliate: 'https://affiliate-link-6.com',
@@ -119,7 +119,7 @@ const App = () => {
           name: 'K2 Mindbender 108',
           category: 'Freeride Skis',
           price: '$749.95',
-          image: '💨',
+          image: 'https://images.unsplash.com/photo-1609595363415-e3d5e1f0a4c7?w=400&h=400&fit=crop',
           specs: '184cm • 108mm Waist • Stiff Flex',
           reason: 'Built for powder and big mountain riding. Floats effortlessly in deep snow.',
           affiliate: 'https://affiliate-link-7.com',
@@ -129,7 +129,7 @@ const App = () => {
           name: 'Blizzard Brahma 82',
           category: 'Carving Skis',
           price: '$499.95',
-          image: '⚡',
+          image: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?w=400&h=400&fit=crop',
           specs: '174cm • 82mm Waist • Stiff Flex',
           reason: 'Excellent groomer ski with precise edge control. Perfect for carving turns at speed.',
           affiliate: 'https://affiliate-link-8.com',
@@ -278,8 +278,12 @@ const App = () => {
               <div className="grid md:grid-cols-3 gap-6">
                 {topPicks.map((product, index) => (
                   <div key={index} className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl transform hover:scale-105 transition-all">
-                    <div className="bg-gradient-to-br from-blue-600 to-cyan-500 p-8 text-center">
-                      <div className="text-6xl mb-4">{product.image}</div>
+                    <div className="h-64 overflow-hidden">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="p-6">
                       <div className="text-sm text-blue-600 font-semibold mb-1">{product.category}</div>
@@ -308,7 +312,13 @@ const App = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {otherOptions.map((product, index) => (
                   <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex gap-4">
-                    <div className="text-5xl">{product.image}</div>
+                    <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <div className="flex-1">
                       <div className="text-sm text-blue-200 mb-1">{product.category}</div>
                       <h3 className="text-xl font-bold mb-2">{product.name}</h3>
