@@ -194,8 +194,9 @@ const App = () => {
 
   if (step === 'landing') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white">
-        <div className="max-w-4xl mx-auto px-6 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80')"}}>
+        <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm"></div>
+        <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <Mountain className="w-20 h-20" />
@@ -207,7 +208,7 @@ const App = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center">
+            <div className="bg-white/15 backdrop-blur-md rounded-lg p-6 text-center border border-white/20 shadow-xl">
               <Award className="w-12 h-12 mx-auto mb-3 text-yellow-300" />
               <h3 className="font-semibold mb-2">Expert Matched</h3>
               <p className="text-sm text-blue-100">Recommendations based on your skill and style</p>
@@ -246,8 +247,9 @@ const App = () => {
     const progress = ((currentQuestion + 1) / questions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white">
-        <div className="max-w-2xl mx-auto px-6 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80')"}}>
+        <div className="absolute inset-0 bg-blue-900/50 backdrop-blur-sm"></div>
+        <div className="max-w-2xl mx-auto px-6 py-16 relative z-10">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-blue-200">Question {currentQuestion + 1} of {questions.length}</span>
@@ -261,7 +263,7 @@ const App = () => {
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+          <div className="bg-white/15 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
             <h2 className="text-3xl font-bold mb-8">{questions[currentQuestion].question}</h2>
             
             <div className="space-y-3">
@@ -269,7 +271,7 @@ const App = () => {
                 <button
                   key={index}
                   onClick={() => handleAnswer(option)}
-                  className="w-full bg-white/5 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-left transition-all hover:scale-102 hover:border-white/40"
+                  className="w-full bg-white/10 hover:bg-white/25 border border-white/30 rounded-lg p-4 text-left transition-all hover:scale-102 hover:border-white/50 backdrop-blur-sm shadow-lg"
                 >
                   {option}
                 </button>
@@ -292,8 +294,9 @@ const App = () => {
 
   if (step === 'results') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80')"}}>
+        <div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm"></div>
+        <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Your Perfect Match</h1>
             <p className="text-xl text-blue-100">
@@ -368,8 +371,8 @@ const App = () => {
               <h2 className="text-2xl font-bold mb-6">Other Great Options</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {otherOptions.map((product, index) => (
-                  <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex gap-4">
-                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/20">
+                  <div key={index} className="bg-white/15 backdrop-blur-md rounded-xl p-6 flex gap-4 border border-white/20 shadow-xl">
+                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/30 backdrop-blur-sm border border-white/20">
                       <img 
                         src={product.image} 
                         alt={product.name}
@@ -410,7 +413,7 @@ const App = () => {
           <div className="mt-12 text-center">
             <button
               onClick={restartQuiz}
-              className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-white/20 hover:bg-white/35 px-6 py-3 rounded-lg font-semibold transition-colors border border-white/30 backdrop-blur-sm"
             >
               Start Over
             </button>
