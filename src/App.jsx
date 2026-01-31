@@ -1125,7 +1125,7 @@ const App = () => {
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center">
             <div className="flex justify-center mb-8">
-              <img src="/logo.png" alt="Green Room Gear Finder" className="w-[100px] h-[100px] object-contain" />
+              <img src="/logo.png" alt="Green Room Gear Finder" className="w-100 h-100 object-contain" />
             </div>
 
             <button
