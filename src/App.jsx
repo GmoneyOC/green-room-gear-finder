@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronRight, Mountain, Award, TrendingUp, DollarSign, ExternalLink, User, Ruler, Scale, RefreshCw } from 'lucide-react';
+import { ChevronRight, Mountain, Award, TrendingUp, DollarSign, ExternalLink, User, Ruler, Scale, RefreshCw, Check } from 'lucide-react';
 import { QUESTIONS, OPTION_LABELS } from './data/questions';
-import { getAnswerLabel, getRecommendations, getSizeRecommendation } from './utils/helpers';
+import { getAnswerLabel, getRecommendations, getSizeRecommendation, extractBrands } from './utils/helpers';
 import { fetchProducts, getCachedProducts, cacheProducts } from './services/googleSheets';
 
 const App = () => {
@@ -14,6 +14,10 @@ const App = () => {
   const [step, setStep] = useState('landing');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
+
+  // Brand filtering state
+  const [brandMode, setBrandMode] = useState('all'); // 'all' or 'specific'
+  const [selectedBrands, setSelectedBrands] = useState([]);
 
   // Load products on mount
   useEffect(() => {
@@ -69,11 +73,18 @@ const App = () => {
     }
   };
 
-  // Calculate recommendations
-  const recommendations = useMemo(
-    () => (step === 'results' && products ? getRecommendations(answers, products) : []),
-    [answers, products, step]
-  );
+  // Extract available brands from products
+  const availableBrands = useMemo(() => {
+    if (!products) return { snowboarding: [], skiing: [] };
+    return extractBrands(products);
+  }, [products]);
+
+  // Calculate recommendations with brand filtering
+  const recommendations = useMemo(() => {
+    if (step !== 'results' || !products) return [];
+    const brandsToFilter = brandMode === 'specific' ? selectedBrands : null;
+    return getRecommendations(answers, products, brandsToFilter);
+  }, [answers, products, step, brandMode, selectedBrands]);
 
   const topPicks = recommendations.slice(0, 3);
   const otherOptions = recommendations.slice(3);
@@ -105,6 +116,57 @@ const App = () => {
     setStep('landing');
     setCurrentQuestion(0);
     setAnswers({});
+    setBrandMode('all');
+    setSelectedBrands([]);
+  };
+
+  // Brand selection handlers
+  const handleBrandToggle = (brand) => {
+    setSelectedBrands(prev => 
+      prev.includes(brand) 
+        ? prev.filter(b => b !== brand)
+        : [...prev, brand]
+    );
+  };
+
+  const handleSelectAllSnowboarding = () => {
+    const allSnowboardBrands = availableBrands.snowboarding;
+    const allSelected = allSnowboardBrands.every(brand => selectedBrands.includes(brand));
+    
+    if (allSelected) {
+      // Deselect all snowboarding brands
+      setSelectedBrands(prev => prev.filter(brand => !allSnowboardBrands.includes(brand)));
+    } else {
+      // Select all snowboarding brands
+      setSelectedBrands(prev => {
+        const withoutSnowboarding = prev.filter(brand => !allSnowboardBrands.includes(brand));
+        return [...withoutSnowboarding, ...allSnowboardBrands];
+      });
+    }
+  };
+
+  const handleSelectAllSkiing = () => {
+    const allSkiBrands = availableBrands.skiing;
+    const allSelected = allSkiBrands.every(brand => selectedBrands.includes(brand));
+    
+    if (allSelected) {
+      // Deselect all ski brands
+      setSelectedBrands(prev => prev.filter(brand => !allSkiBrands.includes(brand)));
+    } else {
+      // Select all ski brands
+      setSelectedBrands(prev => {
+        const withoutSkiing = prev.filter(brand => !allSkiBrands.includes(brand));
+        return [...withoutSkiing, ...allSkiBrands];
+      });
+    }
+  };
+
+  const proceedToQuestionnaire = () => {
+    if (brandMode === 'specific' && selectedBrands.length === 0) {
+      alert('Please select at least one brand to continue.');
+      return;
+    }
+    setStep('questionnaire');
   };
 
   // Loading screen
@@ -151,22 +213,163 @@ const App = () => {
               <img src="/logo.png" alt="Green Room Gear Finder" className="w-[100px] h-[100px] object-contain" />
             </div>
 
-            <button
-              onClick={() => setStep('questionnaire')}
-              className="bg-white text-blue-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 inline-flex items-center gap-2 shadow-2xl"
-            >
-              Get Started
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <div className="space-y-4 max-w-md mx-auto">
+              <button
+                onClick={() => {
+                  setBrandMode('all');
+                  setStep('questionnaire');
+                }}
+                className="w-full bg-white text-blue-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 inline-flex items-center justify-center gap-2 shadow-2xl"
+              >
+                All Brands
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setBrandMode('specific');
+                  setStep('brandSelection');
+                }}
+                className="w-full bg-white/20 text-white border-2 border-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/30 transition-all transform hover:scale-105 inline-flex items-center justify-center gap-2 shadow-2xl backdrop-blur-sm"
+              >
+                Choose Specific Brands
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
 
             <button
               onClick={handleRefresh}
-              className="mt-4 text-blue-200 hover:text-white transition-colors text-sm flex items-center gap-2 mx-auto"
+              className="mt-8 text-blue-200 hover:text-white transition-colors text-sm flex items-center gap-2 mx-auto"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh Inventory
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Brand selection page
+  if (step === 'brandSelection') {
+    const snowboardingAllSelected = availableBrands.snowboarding.length > 0 && 
+      availableBrands.snowboarding.every(brand => selectedBrands.includes(brand));
+    const skiingAllSelected = availableBrands.skiing.length > 0 && 
+      availableBrands.skiing.every(brand => selectedBrands.includes(brand));
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80')"}}>
+        <div className="absolute inset-0 bg-blue-900/50 backdrop-blur-sm"></div>
+        
+        {/* Sticky header with button */}
+        <div className="sticky top-0 z-20 bg-blue-900/80 backdrop-blur-md border-b border-white/20 shadow-lg">
+          <div className="max-w-2xl mx-auto px-6 py-4">
+            <button
+              onClick={proceedToQuestionnaire}
+              className="w-full bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all inline-flex items-center justify-center gap-2 shadow-xl"
+            >
+              Find Your Gear ({selectedBrands.length} brand{selectedBrands.length !== 1 ? 's' : ''} selected)
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable brand list */}
+        <div className="max-w-2xl mx-auto px-6 py-8 relative z-10">
+          <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6 text-center">Choose Your Brands</h2>
+            
+            {/* Snowboarding Brands */}
+            {availableBrands.snowboarding.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Snowboarding</h3>
+                  <button
+                    onClick={handleSelectAllSnowboarding}
+                    className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition-colors"
+                  >
+                    {snowboardingAllSelected ? 'Deselect All' : 'Select All'}
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {availableBrands.snowboarding.map((brand) => (
+                    <label
+                      key={brand}
+                      className="flex items-center justify-between bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-4 cursor-pointer transition-all min-h-[44px]"
+                    >
+                      <span className="font-medium">{brand}</span>
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={selectedBrands.includes(brand)}
+                          onChange={() => handleBrandToggle(brand)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                          selectedBrands.includes(brand)
+                            ? 'bg-white border-white'
+                            : 'bg-transparent border-white/50'
+                        }`}>
+                          {selectedBrands.includes(brand) && (
+                            <Check className="w-4 h-4 text-blue-900" strokeWidth={3} />
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Skiing Brands */}
+            {availableBrands.skiing.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Skiing</h3>
+                  <button
+                    onClick={handleSelectAllSkiing}
+                    className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition-colors"
+                  >
+                    {skiingAllSelected ? 'Deselect All' : 'Select All'}
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {availableBrands.skiing.map((brand) => (
+                    <label
+                      key={brand}
+                      className="flex items-center justify-between bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-4 cursor-pointer transition-all min-h-[44px]"
+                    >
+                      <span className="font-medium">{brand}</span>
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={selectedBrands.includes(brand)}
+                          onChange={() => handleBrandToggle(brand)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                          selectedBrands.includes(brand)
+                            ? 'bg-white border-white'
+                            : 'bg-transparent border-white/50'
+                        }`}>
+                          {selectedBrands.includes(brand) && (
+                            <Check className="w-4 h-4 text-blue-900" strokeWidth={3} />
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => setStep('landing')}
+            className="mt-6 text-blue-200 hover:text-white transition-colors"
+          >
+            ← Back
+          </button>
         </div>
       </div>
     );
@@ -234,6 +437,11 @@ const App = () => {
             <p className="text-xl text-blue-100">
               Based on your answers, here are our top recommendations
             </p>
+            {brandMode === 'specific' && selectedBrands.length > 0 && (
+              <p className="text-sm text-blue-200 mt-2">
+                Filtered by: {selectedBrands.join(', ')}
+              </p>
+            )}
           </div>
 
           {summaryItems.length > 0 && (
@@ -366,6 +574,18 @@ const App = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {recommendations.length === 0 && (
+            <div className="text-center bg-white/10 backdrop-blur-md rounded-lg p-8 border border-white/20">
+              <p className="text-xl mb-4">No products match your selected brands and preferences.</p>
+              <button
+                onClick={() => setStep('brandSelection')}
+                className="bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+              >
+                Choose Different Brands
+              </button>
             </div>
           )}
 
