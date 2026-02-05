@@ -47,8 +47,26 @@ const App = () => {
     }
   };
 
-  const handleRefresh = () => {
-    loadProducts();
+  const handleRefresh = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Clear cache first, then fetch fresh data
+      localStorage.removeItem('grgf_products');
+      localStorage.removeItem('grgf_products_timestamp');
+      
+      // Fetch fresh from Google Sheets
+      const data = await fetchProducts();
+      setProducts(data);
+      cacheProducts(data);
+      setLoading(false);
+      console.log('Refreshed products from Google Sheets:', data);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      console.error('Failed to refresh products:', err);
+    }
   };
 
   // Calculate recommendations
@@ -219,32 +237,20 @@ const App = () => {
           </div>
 
           {summaryItems.length > 0 && (
-            <div className="mb-12 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-green-300" />
-                <h2 className="text-2xl font-bold">Your Ride Profile</h2>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {summaryItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label} className="bg-white/10 rounded-xl p-4 flex gap-3 items-start border border-white/15">
-                      <span className="bg-white/20 rounded-lg p-2">
-                        <Icon className="w-4 h-4 text-white" />
-                      </span>
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-blue-200">{item.label}</p>
-                        <p className="text-sm font-semibold">{item.value}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {sizeRecommendation && (
-                <div className="mt-4 bg-white/15 rounded-xl p-4 border border-white/20 text-sm text-blue-50">
-                  <strong>Size guidance:</strong> {sizeRecommendation}
-                </div>
-              )}
+            <div className="mb-8 bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg max-w-md">
+              <h3 className="text-sm font-bold mb-2 text-blue-100">Your Preferences:</h3>
+              <ul className="text-sm space-y-1 text-white">
+                {summaryItems.map((item) => (
+                  <li key={item.label}>
+                    <strong>{item.label}:</strong> {item.value}
+                  </li>
+                ))}
+                {sizeRecommendation && (
+                  <li className="pt-2 border-t border-white/20 mt-2">
+                    <strong>Size guidance:</strong> {sizeRecommendation}
+                  </li>
+                )}
+              </ul>
             </div>
           )}
 
