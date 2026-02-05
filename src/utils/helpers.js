@@ -5,11 +5,43 @@ export const getAnswerLabel = (questionId, answerId) => {
   return OPTION_LABELS[questionId]?.[answerId] ?? answerId;
 };
 
-// Get recommendations based on user answers
-export const getRecommendations = (answers, allProducts) => {
+// Extract unique brands from products, grouped by sport
+export const extractBrands = (allProducts) => {
+  const brands = {
+    snowboarding: new Set(),
+    skiing: new Set()
+  };
+
+  // Extract from snowboarding products
+  (allProducts.snowboarding ?? []).forEach(product => {
+    if (product.category) {
+      brands.snowboarding.add(product.category);
+    }
+  });
+
+  // Extract from skiing products
+  (allProducts.skiing ?? []).forEach(product => {
+    if (product.category) {
+      brands.skiing.add(product.category);
+    }
+  });
+
+  return {
+    snowboarding: Array.from(brands.snowboarding).sort(),
+    skiing: Array.from(brands.skiing).sort()
+  };
+};
+
+// Get recommendations based on user answers and optional brand filter
+export const getRecommendations = (answers, allProducts, selectedBrands = null) => {
   const products = allProducts[answers.sport] ?? [];
 
-  return products
+  // Filter by selected brands if in specific brand mode
+  const filteredProducts = selectedBrands && selectedBrands.length > 0
+    ? products.filter(product => selectedBrands.includes(product.category))
+    : products;
+
+  return filteredProducts
     .map((product) => {
       const matches = [];
       
