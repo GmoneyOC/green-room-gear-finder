@@ -12,17 +12,17 @@ export const extractBrands = (allProducts) => {
     skiing: new Set()
   };
 
-  // Extract from snowboarding products
+  // Extract from snowboarding products using brand field
   (allProducts.snowboarding ?? []).forEach(product => {
-    if (product.category) {
-      brands.snowboarding.add(product.category);
+    if (product.brand) {
+      brands.snowboarding.add(product.brand);
     }
   });
 
-  // Extract from skiing products
+  // Extract from skiing products using brand field
   (allProducts.skiing ?? []).forEach(product => {
-    if (product.category) {
-      brands.skiing.add(product.category);
+    if (product.brand) {
+      brands.skiing.add(product.brand);
     }
   });
 
@@ -38,7 +38,7 @@ export const getRecommendations = (answers, allProducts, selectedBrands = null) 
 
   // Filter by selected brands if in specific brand mode
   const filteredProducts = selectedBrands && selectedBrands.length > 0
-    ? products.filter(product => selectedBrands.includes(product.category))
+    ? products.filter(product => selectedBrands.includes(product.brand))
     : products;
 
   return filteredProducts
