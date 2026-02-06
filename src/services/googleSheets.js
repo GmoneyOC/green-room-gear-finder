@@ -1,22 +1,62 @@
 // Google Sheets CSV fetcher and parser
-import Papa from 'papaparse';
-
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSPZZjMddxqb8wwlzhexZ_qXGbtudxagqcLFBDIIkJHTK6JmMgnmZuUvIoxjTh-vNvxbeZsSO-6ZaQN/pub?output=csv';
 
 /**
- * Parse list-like CSV fields into string arrays
- * @param {string | undefined} value - Raw list value
- * @returns {string[]} Parsed values
+ * Parse CSV text into array of objects
+ * @param {string} csvText - Raw CSV text
+ * @returns {Array} Array of product objects
  */
-function parseListField(value) {
-  if (!value || typeof value !== 'string') {
-    return [];
+function parseCSV(csvText) {
+  const lines = csvText.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  
+  const products = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    
+    // Parse CSV line handling quoted values
+    const values = [];
+    let currentValue = '';
+    let insideQuotes = false;
+    
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+      
+      if (char === '"') {
+        insideQuotes = !insideQuotes;
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim());
+        currentValue = '';
+      } else {
+        currentValue += char;
+      }
+    }
+    values.push(currentValue.trim()); // Push last value
+    
+    // Create product object
+    const product = {};
+    headers.forEach((header, index) => {
+      let value = values[index] || '';
+      
+      // Remove quotes if present
+      if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.slice(1, -1);
+      }
+      
+      // Parse comma-separated arrays
+      if (['levels', 'styles', 'terrains', 'budgets'].includes(header)) {
+        product[header] = value ? value.split(',').map(v => v.trim()) : [];
+      } else {
+        product[header] = value;
+      }
+    });
+    
+    products.push(product);
   }
-
-  return value
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
+  
+  return products;
 }
 
 /**
@@ -32,38 +72,7 @@ export async function fetchProducts() {
     }
     
     const csvText = await response.text();
-    const { data: parsedRows, errors = [] } = Papa.parse(csvText, {
-      header: true,
-      skipEmptyLines: 'greedy'
-    });
-
-    if (errors.length > 0) {
-      console.warn('CSV parse warnings from Google Sheets:', errors);
-    }
-
-    const safeRows = Array.isArray(parsedRows) ? parsedRows : [];
-
-    const allProducts = safeRows
-      .filter((row) => row && typeof row === 'object')
-      .map((row) => ({
-        ...row,
-        levels: parseListField(row.levels),
-        styles: parseListField(row.styles),
-        terrains: parseListField(row.terrains),
-        budgets: parseListField(row.budgets),
-        sport: typeof row.sport === 'string' ? row.sport.trim().toLowerCase() : ''
-      }))
-      .filter((product) => {
-        const hasAnyData = Object.values(product).some((value) => {
-          if (Array.isArray(value)) {
-            return value.length > 0;
-          }
-
-          return typeof value === 'string' ? value.trim().length > 0 : Boolean(value);
-        });
-
-        return hasAnyData && ['snowboarding', 'skiing'].includes(product.sport);
-      });
+    const allProducts = parseCSV(csvText);
     
     // Split by sport
     const snowboarding = allProducts.filter(p => p.sport === 'snowboarding');
@@ -89,3 +98,53 @@ export async function fetchProducts() {
       skiing: skiing.map(formatProduct)
     };
   } catch (error) {
+    console.error('Error fetching products from Google Sheets:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get cached products from localStorage
+ * @returns {Object|null} Cached products or null
+ */
+export function getCachedProducts() {
+  try {
+    const cached = localStorage.getItem('grgf_products');
+    const timestamp = localStorage.getItem('grgf_products_timestamp');
+    
+    if (cached && timestamp) {
+      return {
+        products: JSON.parse(cached),
+        timestamp: parseInt(timestamp, 10)
+      };
+    }
+  } catch (error) {
+    console.error('Error reading cached products:', error);
+  }
+  return null;
+}
+
+/**
+ * Save products to localStorage
+ * @param {Object} products - Products object
+ */
+export function cacheProducts(products) {
+  try {
+    localStorage.setItem('grgf_products', JSON.stringify(products));
+    localStorage.setItem('grgf_products_timestamp', Date.now().toString());
+  } catch (error) {
+    console.error('Error caching products:', error);
+  }
+}
+
+/**
+ * Clear cached products
+ */
+export function clearCache() {
+  try {
+    localStorage.removeItem('grgf_products');
+    localStorage.removeItem('grgf_products_timestamp');
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+  }
+}
