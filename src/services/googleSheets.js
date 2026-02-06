@@ -78,9 +78,13 @@ export async function fetchProducts() {
     const snowboarding = allProducts.filter(p => p.sport === 'snowboarding');
     const skiing = allProducts.filter(p => p.sport === 'skiing');
     
-    // Create bestFor object for each product (for compatibility with existing code)
+    // Create bestFor object and full name for each product
     const formatProduct = (product) => ({
       ...product,
+      // Create full display name from brand + productName
+      name: product.brand && product.productName 
+        ? `${product.brand} ${product.productName}` 
+        : product.name || '',
       bestFor: {
         levels: product.levels || [],
         styles: product.styles || [],
