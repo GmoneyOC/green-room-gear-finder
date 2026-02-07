@@ -1,29 +1,22 @@
 import { OPTION_LABELS } from '../data/questions';
 
-// Get display label for an answer ID
+/**
+ * Utility to convert internal IDs to human-readable labels
+ */
 export const getAnswerLabel = (questionId, answerId) => {
   return OPTION_LABELS[questionId]?.[answerId] ?? answerId;
 };
 
-// Extract unique brands from products, grouped by sport
+/**
+ * Extracts unique brands from the product list for the selection step
+ */
 export const extractBrands = (allProducts) => {
-  const brands = {
-    snowboarding: new Set(),
-    skiing: new Set()
-  };
+  const brands = { snowboarding: new Set(), skiing: new Set() };
 
-  // Extract from snowboarding products using brand field
-  (allProducts.snowboarding ?? []).forEach(product => {
-    if (product.brand) {
-      brands.snowboarding.add(product.brand);
-    }
-  });
-
-  // Extract from skiing products using brand field
-  (allProducts.skiing ?? []).forEach(product => {
-    if (product.brand) {
-      brands.skiing.add(product.brand);
-    }
+  Object.keys(brands).forEach(sport => {
+    (allProducts[sport] ?? []).forEach(product => {
+      if (product.brand) brands[sport].add(product.brand);
+    });
   });
 
   return {
@@ -32,38 +25,26 @@ export const extractBrands = (allProducts) => {
   };
 };
 
-// Get recommendations based on user answers and optional brand filter
+/**
+ * Weighted recommendation engine
+ * Returns all matching products sorted by match quality
+ */
 export const getRecommendations = (answers, allProducts, selectedBrands = null) => {
-  const products = allProducts[answers.sport] ?? [];
+  const sportProducts = allProducts[answers.sport] ?? [];
 
-  // Filter by selected brands if in specific brand mode
-  const filteredProducts = selectedBrands && selectedBrands.length > 0
-    ? products.filter(product => selectedBrands.includes(product.brand))
-    : products;
+  // Filter by selected brands if the user is in 'specific' brand mode
+  const pool = selectedBrands && selectedBrands.length > 0
+    ? sportProducts.filter(p => selectedBrands.includes(p.brand))
+    : sportProducts;
 
-  return filteredProducts
-    .map((product) => {
+  return pool
+    .map(product => {
       const matches = [];
-      
-      // Check level match
-      if (product.bestFor.levels?.includes(answers.level)) {
-        matches.push('Skill level');
-      }
-      
-      // Check style match
-      if (product.bestFor.styles?.includes(answers.style)) {
-        matches.push('Riding style');
-      }
-      
-      // Check terrain match
-      if (product.bestFor.terrains?.includes(answers.terrain)) {
-        matches.push('Terrain');
-      }
-      
-      // Check budget match
-      if (product.bestFor.budgets?.includes(answers.budget)) {
-        matches.push('Budget');
-      }
+      // Scoring logic looks at the parsed arrays from Google Sheets
+      if (product.bestFor.levels?.includes(answers.level)) matches.push('Skill level');
+      if (product.bestFor.styles?.includes(answers.style)) matches.push('Riding style');
+      if (product.bestFor.terrains?.includes(answers.terrain)) matches.push('Terrain');
+      if (product.bestFor.budgets?.includes(answers.budget)) matches.push('Budget');
 
       return {
         ...product,
@@ -71,57 +52,25 @@ export const getRecommendations = (answers, allProducts, selectedBrands = null) 
         matches
       };
     })
-    .sort((a, b) => {
-      // Sort by score descending, then by name ascending (stable sort)
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-      return a.name.localeCompare(b.name);
-    });
+    // Sort by highest match score, then alphabetically for UI stability
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 };
 
-// Get size recommendation based on height and weight
+/**
+ * Provides size guidance based on the height/weight matrix
+ */
 export const getSizeRecommendation = (answers) => {
-  if (!answers.sport || !answers.height || !answers.weight) {
-    return null;
-  }
+  if (!answers.sport || !answers.height || !answers.weight) return null;
 
-  // Convert height ID to index
-  const heightIndex = {
-    'under-5-4': 1,
-    '5-4-to-5-8': 2,
-    '5-8-to-6-0': 3,
-    'over-6-0': 4
-  }[answers.height] ?? 2;
+  const hMap = { 'under-5-4': 1, '5-4-to-5-8': 2, '5-8-to-6-0': 3, 'over-6-0': 4 };
+  const wMap = { 'under-130': 1, '130-160': 2, '160-190': 3, 'over-190': 4 };
 
-  // Convert weight ID to index
-  const weightIndex = {
-    'under-130': 1,
-    '130-160': 2,
-    '160-190': 3,
-    'over-190': 4
-  }[answers.weight] ?? 2;
+  const sizeIndex = Math.round(((hMap[answers.height] || 2) + (wMap[answers.weight] || 2)) / 2);
 
-  // Calculate size index (average of height and weight)
-  const sizeIndex = Math.round((heightIndex + weightIndex) / 2);
+  const ranges = answers.sport === 'snowboarding' 
+    ? { 1: '140–148cm', 2: '148–154cm', 3: '154–160cm', 4: '160–168cm' }
+    : { 1: '150–160cm', 2: '160–170cm', 3: '170–180cm', 4: '180–190cm' };
 
-  // Return size ranges based on sport
-  if (answers.sport === 'snowboarding') {
-    const ranges = {
-      1: '140–148 cm',
-      2: '148–154 cm',
-      3: '154–160 cm',
-      4: '160–168 cm'
-    };
-    return `Suggested board length: ${ranges[sizeIndex] ?? '150–158 cm'}`;
-  }
-
-  // Skiing size ranges
-  const ranges = {
-    1: '150–160 cm',
-    2: '160–170 cm',
-    3: '170–180 cm',
-    4: '180–190 cm'
-  };
-  return `Suggested ski length: ${ranges[sizeIndex] ?? '165–175 cm'}`;
+  const label = answers.sport === 'snowboarding' ? 'board length' : 'ski length';
+  return `Suggested ${label}: ${ranges[sizeIndex] || 'Standard'}`;
 };
