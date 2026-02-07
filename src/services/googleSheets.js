@@ -1,150 +1,55 @@
-// Google Sheets CSV fetcher and parser
+import Papa from 'papaparse';
+
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSPZZjMddxqb8wwlzhexZ_qXGbtudxagqcLFBDIIkJHTK6JmMgnmZuUvIoxjTh-vNvxbeZsSO-6ZaQN/pub?output=csv';
+const CACHE_KEY = 'grgf_products';
+const CACHE_TS_KEY = 'grgf_products_timestamp';
+const ONE_HOUR = 60 * 60 * 1000;
 
-/**
- * Parse CSV text into array of objects
- * @param {string} csvText - Raw CSV text
- * @returns {Array} Array of product objects
- */
-function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim());
-  
-  const products = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line.trim()) continue;
-    
-    // Parse CSV line handling quoted values
-    const values = [];
-    let currentValue = '';
-    let insideQuotes = false;
-    
-    for (let j = 0; j < line.length; j++) {
-      const char = line[j];
-      
-      if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else if (char === ',' && !insideQuotes) {
-        values.push(currentValue.trim());
-        currentValue = '';
-      } else {
-        currentValue += char;
-      }
-    }
-    values.push(currentValue.trim()); // Push last value
-    
-    // Create product object
-    const product = {};
-    headers.forEach((header, index) => {
-      let value = values[index] || '';
-      
-      // Remove quotes if present
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.slice(1, -1);
-      }
-      
-      // Parse comma-separated arrays
-      if (['levels', 'styles', 'terrains', 'budgets'].includes(header)) {
-        product[header] = value ? value.split(',').map(v => v.trim()) : [];
-      } else {
-        product[header] = value;
-      }
-    });
-    
-    products.push(product);
-  }
-  
-  return products;
-}
-
-/**
- * Fetch products from Google Sheets
- * @returns {Promise<Object>} Object with snowboarding and skiing arrays
- */
 export async function fetchProducts() {
   try {
     const response = await fetch(SHEET_CSV_URL);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch sheet: ${response.status} ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error('Network response was not ok');
     
     const csvText = await response.text();
-    const allProducts = parseCSV(csvText);
     
-    // Split by sport
-    const snowboarding = allProducts.filter(p => p.sport === 'snowboarding');
-    const skiing = allProducts.filter(p => p.sport === 'skiing');
-    
-    // Create bestFor object and full name for each product
-    const formatProduct = (product) => ({
-      ...product,
-      // Create full display name from brand + productName
-      name: product.brand && product.productName 
-        ? `${product.brand} ${product.productName}` 
-        : product.name || '',
+    const { data } = Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true
+    });
+
+    const formatProduct = (p) => ({
+      ...p,
+      name: p.brand && p.productName ? `${p.brand} ${p.productName}` : p.name || 'Unknown Product',
       bestFor: {
-        levels: product.levels || [],
-        styles: product.styles || [],
-        terrains: product.terrains || [],
-        budgets: product.budgets || []
+        levels: p.levels ? p.levels.split(',').map(s => s.trim()) : [],
+        styles: p.styles ? p.styles.split(',').map(s => s.trim()) : [],
+        terrains: p.terrains ? p.terrains.split(',').map(s => s.trim()) : [],
+        budgets: p.budgets ? p.budgets.split(',').map(s => s.trim()) : []
       }
     });
-    
-    return {
-      snowboarding: snowboarding.map(formatProduct),
-      skiing: skiing.map(formatProduct)
+
+    const result = {
+      snowboarding: data.filter(p => p.sport === 'snowboarding').map(formatProduct),
+      skiing: data.filter(p => p.sport === 'skiing').map(formatProduct)
     };
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(result));
+    localStorage.setItem(CACHE_TS_KEY, Date.now().toString());
+    return result;
   } catch (error) {
-    console.error('Error fetching products from Google Sheets:', error);
+    console.error('Error fetching gear data:', error);
     throw error;
   }
 }
 
-/**
- * Get cached products from localStorage
- * @returns {Object|null} Cached products or null
- */
 export function getCachedProducts() {
-  try {
-    const cached = localStorage.getItem('grgf_products');
-    const timestamp = localStorage.getItem('grgf_products_timestamp');
-    
-    if (cached && timestamp) {
-      return {
-        products: JSON.parse(cached),
-        timestamp: parseInt(timestamp, 10)
-      };
-    }
-  } catch (error) {
-    console.error('Error reading cached products:', error);
-  }
-  return null;
-}
+  const cached = localStorage.getItem(CACHE_KEY);
+  const ts = localStorage.getItem(CACHE_TS_KEY);
+  if (!cached || !ts) return null;
 
-/**
- * Save products to localStorage
- * @param {Object} products - Products object
- */
-export function cacheProducts(products) {
-  try {
-    localStorage.setItem('grgf_products', JSON.stringify(products));
-    localStorage.setItem('grgf_products_timestamp', Date.now().toString());
-  } catch (error) {
-    console.error('Error caching products:', error);
-  }
-}
-
-/**
- * Clear cached products
- */
-export function clearCache() {
-  try {
-    localStorage.removeItem('grgf_products');
-    localStorage.removeItem('grgf_products_timestamp');
-  } catch (error) {
-    console.error('Error clearing cache:', error);
-  }
+  const isExpired = Date.now() - parseInt(ts) > ONE_HOUR;
+  return {
+    products: JSON.parse(cached),
+    isExpired
+  };
 }
