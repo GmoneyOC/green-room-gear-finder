@@ -426,8 +426,31 @@ const App = () => {
     );
   }
 
-  // Results page
+// Results page
   if (step === 'results') {
+    // New Logic: Group remaining products by brand for specific brand mode
+    const secondaryBrandPicks = (() => {
+      if (brandMode !== 'specific') return [];
+      
+      const remaining = recommendations.slice(3);
+      const grouped = {};
+
+      selectedBrands.forEach(brand => {
+        // Find up to 3 more picks for this specific brand from the remaining pool
+        const brandMatches = remaining
+          .filter(p => p.brand === brand)
+          .slice(0, 3);
+        
+        if (brandMatches.length > 0) {
+          grouped[brand] = brandMatches;
+        }
+      });
+
+      return grouped;
+    })();
+
+    const otherOptions = recommendations.slice(3);
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80')"}}>
         <div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm"></div>
@@ -466,7 +489,7 @@ const App = () => {
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 <Award className="w-6 h-6 text-yellow-300" />
-                Top Picks For You
+                Overall Top Picks
               </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 {topPicks.map((product) => (
@@ -491,9 +514,6 @@ const App = () => {
                         </div>
                         <div className="text-xs text-gray-600 mt-2">
                           <strong>Best For:</strong> {product.terrain}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {product.styleRating}
                         </div>
                       </div>
                       
@@ -530,51 +550,87 @@ const App = () => {
             </div>
           )}
 
-          {otherOptions.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Other Great Options</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {otherOptions.map((product) => (
-                  <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-6 flex gap-4 border border-white/20 shadow-xl">
-                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/30 backdrop-blur-sm border border-white/20">
-                      <img 
-                        src={product.image} 
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-blue-200 mb-1">{product.category}</div>
-                      <h3 className="text-xl font-bold mb-2">{product.name}</h3>
+          {/* BRAND-SPECIFIC SECTIONS OR GENERAL FALLBACK */}
+          {brandMode === 'specific' ? (
+            Object.entries(secondaryBrandPicks).map(([brand, items]) => (
+              <div key={brand} className="mb-12">
+                <h2 className="text-2xl font-bold mb-6 border-b border-white/20 pb-2 flex items-center gap-2">
+                  More from {brand}
+                </h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {items.map((product) => (
+                    <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-6 flex flex-col border border-white/20 shadow-xl">
+                      <div className="h-40 mb-4 rounded-lg overflow-hidden bg-white/30">
+                        <img 
+                          src={product.image} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold mb-1">{product.name}</h3>
                       <p className="text-lg font-bold text-yellow-300 mb-2">{product.price}</p>
-                      <p className="text-xs text-blue-100 mb-1">{product.specs}</p>
-                      <p className="text-xs text-blue-200 mb-3">Stiffness: {product.stiffness}</p>
-                      {product.matches.length > 0 && (
-                        <p className="text-xs text-blue-50 mb-3">✓ Matched: {product.matches.join(', ')}</p>
-                      )}
-                      <div className="flex gap-2">
-                        <a
-                          href={product.affiliate}
-                          target="_blank"
+                      <p className="text-xs text-blue-100 mb-4 line-clamp-3">{product.reason}</p>
+                      <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                        <a 
+                          href={product.affiliate} 
+                          target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                          className="text-sm font-bold hover:text-yellow-300 transition-colors"
                         >
-                          Buy Now →
+                          SHOP NOW →
                         </a>
-                        <a
-                          href={product.productLink}
-                          target="_blank"
+                        <a 
+                          href={product.productLink} 
+                          target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-blue-200 hover:text-white transition-colors px-2"
+                          className="text-xs text-blue-300 hover:text-white transition-colors"
                         >
-                          Details <ExternalLink className="w-3 h-3" />
+                          View Details
                         </a>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            ))
+          ) : (
+            otherOptions.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Other Great Options</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {otherOptions.map((product) => (
+                    <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-6 flex gap-4 border border-white/20 shadow-xl">
+                      <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/30 backdrop-blur-sm border border-white/20">
+                        <img 
+                          src={product.image} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm text-blue-200 mb-1">{product.category}</div>
+                        <h3 className="text-xl font-bold mb-2">{product.name}</h3>
+                        <p className="text-lg font-bold text-yellow-300 mb-2">{product.price}</p>
+                        <p className="text-xs text-blue-100 mb-1">{product.specs}</p>
+                        {product.matches.length > 0 && (
+                          <p className="text-xs text-blue-50 mb-3">✓ Matched: {product.matches.join(', ')}</p>
+                        )}
+                        <div className="flex gap-2">
+                          <a
+                            href={product.affiliate}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                          >
+                            Buy Now →
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {recommendations.length === 0 && (
