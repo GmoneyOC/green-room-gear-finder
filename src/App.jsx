@@ -92,7 +92,6 @@ const App = () => {
     return grouped;
   }, [recommendations, topPicks, brandMode, selectedBrands, step]);
 
-  const otherOptions = recommendations.slice(3);
   const sizeRecommendation = useMemo(() => getSizeRecommendation(answers), [answers]);
 
   const summaryItems = [
@@ -156,6 +155,28 @@ const App = () => {
     setStep('questionnaire');
   };
 
+  // Shared Background Component with Video + Fallback
+  const Background = ({ imageUrl }) => (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
+        poster={imageUrl} // Fallback image while loading or if video fails
+      >
+        <source src="http://googleusercontent.com/generated_video_content/2173167518108878569" type="video/mp4" />
+        <img 
+          src={imageUrl} 
+          className="w-full h-full object-cover" 
+          alt="background fallback" 
+        />
+      </video>
+      <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm z-10"></div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-blue-900 text-white flex items-center justify-center">
@@ -185,8 +206,8 @@ const App = () => {
 
   if (step === 'landing') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700 text-white relative bg-cover bg-center flex items-center justify-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80&fm=webp')"}}>
-        <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm"></div>
+      <div className="min-h-screen text-white relative flex items-center justify-center">
+        <Background imageUrl="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80&fm=webp" />
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10 text-center">
           <div className="flex justify-center mb-8">
             <img src="/logo.png" alt="Green Room Gear Finder" className="w-[300px] h-auto object-contain" />
@@ -208,12 +229,9 @@ const App = () => {
   }
 
   if (step === 'brandSelection') {
-    const snowboardingAllSelected = availableBrands.snowboarding.length > 0 && availableBrands.snowboarding.every(brand => selectedBrands.includes(brand));
-    const skiingAllSelected = availableBrands.skiing.length > 0 && availableBrands.skiing.every(brand => selectedBrands.includes(brand));
-
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp')"}}>
-        <div className="absolute inset-0 bg-blue-900/50 backdrop-blur-sm"></div>
+      <div className="min-h-screen text-white relative">
+        <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
         <div className="sticky top-0 z-20 bg-blue-900/80 backdrop-blur-md border-b border-white/20">
           <div className="max-w-2xl mx-auto px-6 py-4">
             <button onClick={proceedToQuestionnaire} className="w-full bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-2 shadow-xl">
@@ -221,7 +239,7 @@ const App = () => {
             </button>
           </div>
         </div>
-        <div className="max-w-2xl mx-auto px-6 py-8 relative z-10">
+        <div className="max-w-2xl mx-auto px-6 py-8 relative z-20">
           <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20">
             <h2 className="text-2xl font-bold mb-6 text-center">Choose Your Brands</h2>
             {['snowboarding', 'skiing'].map(sport => availableBrands[sport].length > 0 && (
@@ -229,7 +247,7 @@ const App = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-semibold capitalize">{sport}</h3>
                   <button onClick={sport === 'snowboarding' ? handleSelectAllSnowboarding : handleSelectAllSkiing} className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded">
-                    {(sport === 'snowboarding' ? snowboardingAllSelected : skiingAllSelected) ? 'Deselect All' : 'Select All'}
+                    Select All
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -256,9 +274,9 @@ const App = () => {
     const currentQ = QUESTIONS[currentQuestion];
     const progress = ((currentQuestion + 1) / QUESTIONS.length) * 100;
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp')"}}>
-        <div className="absolute inset-0 bg-blue-900/50 backdrop-blur-sm"></div>
-        <div className="max-w-2xl mx-auto px-6 py-16 relative z-10">
+      <div className="min-h-screen text-white relative flex items-center justify-center">
+        <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
+        <div className="max-w-2xl mx-auto px-6 py-16 relative z-20 w-full">
           <div className="mb-8">
             <div className="flex justify-between text-sm text-blue-200 mb-2">
               <span>Question {currentQuestion + 1} of {QUESTIONS.length}</span>
@@ -286,9 +304,9 @@ const App = () => {
 
   if (step === 'results') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-700 text-white relative bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80&fm=webp')"}}>
-        <div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm"></div>
-        <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">
+      <div className="min-h-screen text-white relative">
+        <Background imageUrl="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80&fm=webp" />
+        <div className="max-w-6xl mx-auto px-6 py-16 relative z-20">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Your Perfect Match</h1>
             <p className="text-xl text-blue-100">Based on your answers, here are our top recommendations</p>
@@ -320,8 +338,8 @@ const App = () => {
                       <div className="text-sm text-blue-600 font-semibold mb-1">{product.category}</div>
                       <h3 className="text-xl font-bold mb-2">{product.name}</h3>
                       <p className="text-2xl font-bold text-blue-600 mb-4">{product.price}</p>
-                      <div className="space-y-3 mb-6 flex-1">
-                        <p className="text-sm text-gray-700 leading-relaxed">{product.reason}</p>
+                      <div className="space-y-3 mb-6 flex-1 text-sm text-gray-700 leading-relaxed">
+                        <p>{product.reason}</p>
                         {product.matches.length > 0 && (
                           <div className="rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-2">
                             ✓ Matched on: {product.matches.join(', ')}
@@ -330,7 +348,7 @@ const App = () => {
                       </div>
                       <div className="space-y-2">
                         <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-semibold transition-colors">Buy Now →</a>
-                        <a href={product.productLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-700">Full Product Details <ExternalLink className="w-3 h-3" /></a>
+                        <a href={product.productLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-700">Details <ExternalLink className="w-3 h-3" /></a>
                       </div>
                     </div>
                   </div>
@@ -339,65 +357,33 @@ const App = () => {
             </div>
           )}
 
-          {/* BRAND-SPECIFIC SECTIONS OR FALLBACK */}
-          {brandMode === 'specific' ? (
-            Object.entries(secondaryBrandPicks).map(([brand, items]) => (
-              <div key={brand} className="mb-16">
-                <h2 className="text-2xl font-bold mb-6 border-b border-white/30 pb-3 flex items-center justify-between">
-                  <span>More Recommended from {brand}</span>
-                  <span className="text-sm font-normal text-blue-200">{items.length} Options</span>
-                </h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {items.map((product) => (
-                    <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-5 flex flex-col border border-white/20 shadow-xl hover:bg-white/20 transition-colors">
-                      <div className="h-40 mb-4 rounded-lg overflow-hidden bg-white/10">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                      </div>
-                      <h3 className="text-lg font-bold mb-1">{product.name}</h3>
-                      <p className="text-yellow-300 font-bold mb-3">{product.price}</p>
-                      <p className="text-xs text-blue-100 mb-4 line-clamp-3 leading-relaxed">{product.reason}</p>
-                      <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                        <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-yellow-300 transition-colors">SHOP NOW →</a>
-                        <a href={product.productLink} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-300 hover:text-white">View Details</a>
-                      </div>
+          {/* BRAND-SPECIFIC SECTIONS */}
+          {brandMode === 'specific' && Object.entries(secondaryBrandPicks).map(([brand, items]) => (
+            <div key={brand} className="mb-16">
+              <h2 className="text-2xl font-bold mb-6 border-b border-white/30 pb-3 flex items-center justify-between">
+                <span>More from {brand}</span>
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                {items.map((product) => (
+                  <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-5 flex flex-col border border-white/20 shadow-xl">
+                    <div className="h-40 mb-4 rounded-lg overflow-hidden bg-white/10">
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : (
-            otherOptions.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold mb-6">Other Great Options</h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {otherOptions.map((product) => (
-                    <div key={product.name} className="bg-white/15 backdrop-blur-md rounded-xl p-6 flex gap-4 border border-white/20 shadow-xl">
-                      <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-white/10">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-1">{product.name}</h3>
-                        <p className="text-yellow-300 font-bold mb-2">{product.price}</p>
-                        <p className="text-xs text-blue-100 line-clamp-2 mb-3">{product.reason}</p>
-                        <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="inline-block bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">Buy Now →</a>
-                      </div>
+                    <h3 className="text-lg font-bold mb-1">{product.name}</h3>
+                    <p className="text-yellow-300 font-bold mb-3">{product.price}</p>
+                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                      <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-yellow-300 transition-colors uppercase">Shop Now →</a>
+                      <a href={product.productLink} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-300 hover:text-white">Details</a>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            )
-          )}
-
-          {recommendations.length === 0 && (
-            <div className="text-center bg-white/10 backdrop-blur-md rounded-lg p-12 border border-white/20">
-              <p className="text-xl mb-6">No products match your selected brands and preferences.</p>
-              <button onClick={() => setStep('brandSelection')} className="bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">Choose Different Brands</button>
             </div>
-          )}
+          ))}
 
           <div className="mt-16 text-center space-y-8">
             <button onClick={restartQuiz} className="bg-white/20 hover:bg-white/35 px-8 py-4 rounded-full font-bold transition-all border border-white/30 backdrop-blur-sm">Start Over</button>
-            <p className="text-xs text-blue-200">* Disclosure: We may earn a commission if you purchase through our links, at no extra cost to you.</p>
+            <p className="text-xs text-blue-200">* Disclosure: We may earn a commission if you purchase through our links.</p>
           </div>
         </div>
       </div>
