@@ -156,26 +156,29 @@ const App = () => {
   };
 
   // Shared Background Component with Video + Fallback
-  const Background = ({ imageUrl }) => (
-    <div className="absolute inset-0 z-0 overflow-hidden">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
-        poster={imageUrl} // Fallback image while loading or if video fails
-      >
-        <source src="http://googleusercontent.com/generated_video_content/2173167518108878569" type="video/mp4" />
-        <img 
-          src={imageUrl} 
-          className="w-full h-full object-cover" 
-          alt="background fallback" 
-        />
-      </video>
-      <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm z-10"></div>
-    </div>
-  );
+const Background = ({ imageUrl }) => (
+  <div className="absolute inset-0 z-0 overflow-hidden">
+    <video
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
+      poster={imageUrl} // This shows the Unsplash image if the video fails
+    >
+      {/* UPDATE THIS LINE BELOW */}
+      <source src="/snow-background.mp4" type="video/mp4" />
+      
+      {/* Fallback for very old browsers */}
+      <img 
+        src={imageUrl} 
+        className="w-full h-full object-cover" 
+        alt="background fallback" 
+      />
+    </video>
+    <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm z-10"></div>
+  </div>
+);
 
   if (loading) {
     return (
