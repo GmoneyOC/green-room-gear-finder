@@ -57,6 +57,7 @@ const App = () => {
             "configUrl": "https://files.bpcontent.cloud/2026/02/10/01/20260210012639-5UUL1MVZ.json",
             "showWidget": true,
             "openByDefault": true
+            "botName": "Gear Finder Stevo"
           });
         }
       };
