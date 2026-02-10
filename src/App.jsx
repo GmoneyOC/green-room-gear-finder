@@ -36,7 +36,7 @@ const App = () => {
     }
   }, [step]);
 
-  // BOTPRESS NATIVE INJECTION (Using your specific script IDs)
+  // BOTPRESS NATIVE INJECTION
   useEffect(() => {
     if (showChat && !document.getElementById('botpress-inject')) {
       const injectScript = document.createElement('script');
@@ -56,8 +56,14 @@ const App = () => {
           window.botpressWebChat.init({
             "configUrl": "https://files.bpcontent.cloud/2026/02/10/01/20260210012639-5UUL1MVZ.json",
             "showWidget": true,
-            "openByDefault": true
-            "botName": "Gear Finder Stevo"
+            "openByDefault": true,
+            "botName": "Gear Finder Stevo",
+            "additionalStylesheet": `
+              .bpw-header-container { background: #1b4332 !important; border-bottom: 3px solid #ff6b00 !important; }
+              .bpw-from-user .bpw-chat-bubble { background-color: #ff6b00 !important; color: white !important; }
+              .bpw-floating-button { background: #ff6b00 !important; }
+              .bpw-send-button { color: #ff6b00 !important; }
+            `
           });
         }
       };
@@ -106,7 +112,6 @@ const App = () => {
   };
 
   const restartQuiz = () => {
-    // Hide Botpress UI safely if it exists
     if (window.botpressWebChat && typeof window.botpressWebChat.sendEvent === 'function') {
       window.botpressWebChat.sendEvent({ type: 'hide' });
     }
@@ -118,34 +123,30 @@ const App = () => {
     setShowChat(false);
   };
 
-  // FIXED BACKGROUND COMPONENT (pointer-events-none is key!)
   const Background = ({ imageUrl }) => (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      <video 
-        autoPlay 
-        loop 
-        muted 
-        playsInline 
-        className="absolute w-full h-full object-cover" 
-        poster={imageUrl}
-      >
-        <source src="http://googleusercontent.com/generated_video_content/17535164558139445137" type="video/mp4" />
+      <video autoPlay loop muted playsInline className="absolute w-full h-full object-cover" poster={imageUrl}>
+        <source src="/snow-background.mp4" type="video/mp4" />
         <img src={imageUrl} className="w-full h-full object-cover" alt="bg" />
       </video>
       <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-[2px] z-10"></div>
     </div>
   );
 
-  if (loading) return <div className="min-h-screen bg-blue-900 flex items-center justify-center text-white text-xl font-bold">LOADING GEAR...</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-blue-900 flex items-center justify-center text-white text-xl font-bold">
+      <div className="animate-pulse">LOADING GEAR...</div>
+    </div>
+  );
 
   if (step === 'landing') return (
     <div className="min-h-screen text-white relative flex items-center justify-center overflow-hidden">
       <Background imageUrl="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80&fm=webp" />
       <div className="max-w-4xl mx-auto px-6 py-16 relative z-20 text-center">
-        <img src="/logo.png" alt="Logo" className="w-[300px] mx-auto mb-12 drop-shadow-2xl" />
+        <img src="/logo.png" alt="Green Room" className="w-[300px] mx-auto mb-12 drop-shadow-2xl" />
         <div className="space-y-6 max-w-md mx-auto">
-          <button onClick={() => { setBrandMode('all'); setStep('questionnaire'); }} className="w-full bg-white text-blue-900 px-8 py-5 rounded-full font-black text-xl shadow-2xl hover:bg-blue-50 transition-all active:scale-95">ALL BRANDS</button>
-          <button onClick={() => { setBrandMode('specific'); setStep('brandSelection'); }} className="w-full bg-transparent border-4 border-white text-white px-8 py-4 rounded-full font-black text-xl backdrop-blur-md hover:bg-white/10 transition-all active:scale-95">SPECIFIC BRANDS</button>
+          <button onClick={() => { setBrandMode('all'); setStep('questionnaire'); }} className="w-full bg-white text-blue-900 px-8 py-5 rounded-full font-black text-xl shadow-2xl hover:bg-blue-50 transition-all active:scale-95 uppercase">ALL BRANDS</button>
+          <button onClick={() => { setBrandMode('specific'); setStep('brandSelection'); }} className="w-full bg-transparent border-4 border-white text-white px-8 py-4 rounded-full font-black text-xl backdrop-blur-md hover:bg-white/10 transition-all active:scale-95 uppercase">SPECIFIC BRANDS</button>
         </div>
       </div>
     </div>
@@ -155,19 +156,19 @@ const App = () => {
     <div className="min-h-screen text-white relative flex flex-col overflow-x-hidden">
       <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
       <div className="sticky top-0 z-30 bg-blue-900/90 backdrop-blur-md border-b border-white/20 p-6">
-        <button onClick={() => setStep('questionnaire')} className="w-full max-w-2xl mx-auto bg-white text-blue-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl">
+        <button onClick={() => setStep('questionnaire')} className="w-full max-w-2xl mx-auto bg-white text-blue-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl uppercase">
           START FINDER ({selectedBrands.length} SELECTED) <ChevronRight strokeWidth={3} />
         </button>
       </div>
       <div className="max-w-2xl mx-auto px-6 py-12 relative z-20 w-full">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
           <h2 className="text-3xl font-black mb-8 text-center italic uppercase">Pick Your Brands</h2>
           {['snowboarding', 'skiing'].map(sport => availableBrands[sport].length > 0 && (
             <div key={sport} className="mb-10">
               <h3 className="text-xl font-black uppercase mb-4 text-blue-300 border-b border-blue-300/30 pb-2">{sport}</h3>
               <div className="grid gap-3">
                 {availableBrands[sport].map(brand => (
-                  <label key={brand} className={`flex items-center justify-between p-5 rounded-2xl cursor-pointer transition-all border-2 ${selectedBrands.includes(brand) ? 'bg-white text-blue-900 border-white' : 'bg-white/5 border-white/20'}`}>
+                  <label key={brand} className={`flex items-center justify-between p-5 rounded-2xl cursor-pointer transition-all border-2 ${selectedBrands.includes(brand) ? 'bg-white text-blue-900 border-white' : 'bg-white/5 border-white/20 text-white hover:bg-white/10'}`}>
                     <span className="font-black uppercase italic">{brand}</span>
                     <input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand])} className="hidden" />
                     <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedBrands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-white/30'}`}>
@@ -190,7 +191,7 @@ const App = () => {
         <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
         <div className="max-w-2xl mx-auto px-6 py-16 relative z-20 w-full">
           <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-10 border border-white/20 shadow-2xl">
-            <h2 className="text-4xl font-black mb-10 italic uppercase">{q.question}</h2>
+            <h2 className="text-4xl font-black mb-10 italic uppercase tracking-tighter leading-tight">{q.question}</h2>
             <div className="space-y-4">
               {q.options.map((opt) => (
                 <button key={opt.id} onClick={() => handleAnswer(opt.id)} className="w-full bg-white/5 hover:bg-white text-white hover:text-blue-900 border-2 border-white/30 hover:border-white rounded-2xl p-6 text-left font-black uppercase italic transition-all text-lg shadow-lg">
@@ -205,26 +206,26 @@ const App = () => {
   }
 
   if (step === 'results') return (
-    <div className="min-h-screen text-white relative flex flex-col">
+    <div className="min-h-screen text-white relative flex flex-col overflow-x-hidden">
       <Background imageUrl="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80&fm=webp" />
       <div className="max-w-6xl mx-auto px-6 py-20 relative z-20 w-full">
         <div className="text-center mb-16">
-          <h1 className="text-6xl font-black mb-4 italic uppercase tracking-tighter">Your Results</h1>
+          <h1 className="text-6xl font-black mb-4 italic uppercase tracking-tighter">Your Setup</h1>
           <div className="h-2 w-24 bg-blue-500 mx-auto rounded-full"></div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-10 mb-20">
           {topPicks.map((product) => (
-            <div key={product.name} className="bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border-b-8 border-blue-600 transition-transform hover:-translate-y-2">
+            <div key={product.name} className="bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border-b-8 border-blue-600 transition-all hover:-translate-y-2">
               <div className="relative h-72">
                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 <div className="absolute top-4 left-4 bg-blue-600 text-white px-4 py-1 rounded-full font-black text-xs uppercase italic">Top Pick</div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
-                <div className="text-blue-600 font-black uppercase italic text-sm mb-1">{product.brand}</div>
-                <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase italic leading-tight">{product.name}</h3>
+                <div className="text-blue-600 font-black uppercase italic text-sm mb-1 tracking-widest">{product.brand}</div>
+                <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase italic leading-none">{product.name}</h3>
                 <p className="text-3xl font-black text-blue-600 mb-6">{product.price}</p>
-                <p className="text-gray-600 font-medium mb-8 flex-1">{product.reason}</p>
+                <p className="text-gray-600 font-medium mb-8 flex-1 leading-relaxed">{product.reason}</p>
                 <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 py-5 rounded-2xl font-black text-center text-white text-xl shadow-xl hover:bg-blue-700 transition-colors uppercase italic">Get It Now</a>
               </div>
             </div>
@@ -236,13 +237,13 @@ const App = () => {
             <h2 className="text-3xl font-black mb-10 border-b-4 border-white/20 pb-4 italic uppercase tracking-tighter">More {brand} Gear</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {items.map((product) => (
-                <div key={product.name} className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl hover:bg-white/20 transition-all">
+                <div key={product.name} className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl hover:bg-white/20 transition-all group">
                   <div className="h-48 rounded-2xl overflow-hidden mb-6">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <h3 className="text-xl font-black mb-1 italic uppercase">{product.name}</h3>
                   <p className="text-blue-300 font-black mb-6 text-2xl">{product.price}</p>
-                  <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-black text-white hover:text-blue-300 uppercase italic tracking-widest">Shop Item →</a>
+                  <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-black text-white hover:text-blue-300 uppercase italic tracking-widest transition-colors">Shop Item →</a>
                 </div>
               ))}
             </div>
@@ -250,7 +251,7 @@ const App = () => {
         ))}
 
         <div className="text-center pt-10">
-          <button onClick={restartQuiz} className="bg-white/10 border-4 border-white px-12 py-5 rounded-full font-black text-2xl hover:bg-white hover:text-blue-900 transition-all uppercase italic tracking-tighter">Start Over</button>
+          <button onClick={restartQuiz} className="bg-white/10 border-4 border-white px-12 py-5 rounded-full font-black text-2xl hover:bg-white hover:text-blue-900 transition-all uppercase italic tracking-tighter shadow-2xl">Start Over</button>
         </div>
       </div>
     </div>
