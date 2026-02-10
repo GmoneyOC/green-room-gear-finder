@@ -152,38 +152,54 @@ const App = () => {
     </div>
   );
 
-  if (step === 'brandSelection') return (
-    <div className="min-h-screen text-white relative flex flex-col overflow-x-hidden">
-      <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
-      <div className="sticky top-0 z-30 bg-blue-900/90 backdrop-blur-md border-b border-white/20 p-6">
-        <button onClick={() => setStep('questionnaire')} className="w-full max-w-2xl mx-auto bg-white text-blue-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl uppercase">
-          START FINDER ({selectedBrands.length} SELECTED) <ChevronRight strokeWidth={3} />
-        </button>
-      </div>
-      <div className="max-w-2xl mx-auto px-6 py-12 relative z-20 w-full">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-          <h2 className="text-3xl font-black mb-8 text-center italic uppercase">Pick Your Brands</h2>
-          {['snowboarding', 'skiing'].map(sport => availableBrands[sport].length > 0 && (
-            <div key={sport} className="mb-10">
-              <h3 className="text-xl font-black uppercase mb-4 text-blue-300 border-b border-blue-300/30 pb-2">{sport}</h3>
-              <div className="grid gap-3">
-                {availableBrands[sport].map(brand => (
-                  <label key={brand} className={`flex items-center justify-between p-5 rounded-2xl cursor-pointer transition-all border-2 ${selectedBrands.includes(brand) ? 'bg-white text-blue-900 border-white' : 'bg-white/5 border-white/20 text-white hover:bg-white/10'}`}>
-                    <span className="font-black uppercase italic">{brand}</span>
-                    <input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand])} className="hidden" />
-                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedBrands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-white/30'}`}>
-                      {selectedBrands.includes(brand) && <Check className="w-5 h-5 text-white" strokeWidth={4} />}
-                    </div>
-                  </label>
-                ))}
-              </div>
+if (step === 'brandSelection') return (
+  <div className="min-h-screen text-white relative">
+    {/* 1. Ensure Background is fixed (already in your code) */}
+    <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
+    
+    {/* 2. FIXED HEADER: Removed 'flex flex-col' from parent to allow stickiness */}
+    <div className="sticky top-0 z-50 bg-blue-900/95 backdrop-blur-md border-b border-white/20 p-6 shadow-2xl">
+      <button 
+        onClick={() => setStep('questionnaire')} 
+        className="w-full max-w-2xl mx-auto bg-white text-blue-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl transition-transform active:scale-95 uppercase"
+      >
+        START FINDER ({selectedBrands.length} SELECTED) <ChevronRight strokeWidth={3} />
+      </button>
+    </div>
+
+    {/* 3. CONTENT AREA: Ensure this has z-20 to stay behind the sticky header */}
+    <div className="max-w-2xl mx-auto px-6 py-12 relative z-20 w-full">
+      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+        <h2 className="text-3xl font-black mb-8 text-center italic uppercase tracking-tighter">Pick Your Brands</h2>
+        
+        {['snowboarding', 'skiing'].map(sport => availableBrands[sport].length > 0 && (
+          <div key={sport} className="mb-10">
+            <h3 className="text-xl font-black uppercase mb-4 text-blue-300 border-b border-blue-300/30 pb-2 tracking-widest">
+              {sport}
+            }
+            <div className="grid gap-3">
+              {availableBrands[sport].map(brand => (
+                <label key={brand} className={`flex items-center justify-between p-5 rounded-2xl cursor-pointer transition-all border-2 ${selectedBrands.includes(brand) ? 'bg-white text-blue-900 border-white shadow-lg' : 'bg-white/5 border-white/20 text-white hover:bg-white/10'}`}>
+                  <span className="font-black uppercase italic">{brand}</span>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedBrands.includes(brand)} 
+                    onChange={() => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand])} 
+                    className="hidden" 
+                  />
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedBrands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-white/30'}`}>
+                    {selectedBrands.includes(brand) && <Check className="w-5 h-5 text-white" strokeWidth={4} />}
+                  </div>
+                </label>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
-  );
-
+  </div>
+);
+        
   if (step === 'questionnaire') {
     const q = QUESTIONS[currentQuestion];
     return (
