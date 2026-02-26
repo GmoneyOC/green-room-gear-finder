@@ -42,6 +42,7 @@ export const QUESTIONS = [
     id: 'budget',
     question: 'What\'s your budget?',
     options: [
+      { id: 'under-500', label: 'Under $500' },
       { id: '500-800', label: '$500 - $800' },
       { id: '800-plus', label: '$800+' }
     ]
@@ -93,6 +94,7 @@ export const OPTION_LABELS = {
     'mixed': 'Mixed'
   },
   budget: {
+    'under-500': 'Under $500',
     '500-800': '$500 - $800',
     '800-plus': '$800+'
   },
