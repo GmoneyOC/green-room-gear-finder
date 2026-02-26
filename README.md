@@ -1,124 +1,54 @@
-# Snow Gear Finder
+# Green Room Gear Finder
 
-A web app that helps users find the perfect snowboard or skis based on their riding style, skill level, and preferences. Built with React and Tailwind CSS.
+A React web app that helps users find the perfect snowboard or skis based on their skill level, riding style, terrain preference, budget, and body measurements.
 
-## 🚀 Quick Deploy to Vercel (Recommended)
+## Tech Stack
 
-### Step 1: Upload to GitHub
+- **React 18** + **Vite** for fast builds
+- **Tailwind CSS** for styling
+- **PapaParse** for CSV parsing
+- **Google Sheets** as the product database (published as CSV)
+- **Botpress** chatbot for additional gear guidance
+- **Vercel** for deployment (auto-deploys from `main`)
 
-1. Go to [github.com](https://github.com) and sign in
-2. Click the "+" icon in top right → "New repository"
-3. Name it: `snow-gear-finder`
-4. Set to "Public"
-5. **DO NOT** initialize with README (we already have files)
-6. Click "Create repository"
+## How It Works
 
-7. On the next page, look for "uploading an existing file"
-8. Click that link
-9. Drag and drop ALL the project files into the upload area:
-   - package.json
-   - vite.config.js
-   - tailwind.config.js
-   - postcss.config.js
-   - index.html
-   - .gitignore
-   - README.md
-   - Create a folder called `src` and upload:
-     - main.jsx
-     - App.jsx
-     - index.css
+1. User picks "All Brands" or selects specific brands
+2. A 7-question quiz captures sport, skill level, riding style, terrain, budget, height, and weight
+3. Products are fetched from a Google Sheets CSV and scored against the user's answers
+4. Top 3 recommendations are displayed with affiliate links
+5. Size recommendation is shown based on height/weight matrix
+6. Botpress chatbot appears after 8 seconds on the results page
 
-10. Click "Commit changes"
+## Project Structure
 
-### Step 2: Deploy to Vercel
-
-1. Go to [vercel.com](https://vercel.com)
-2. Click "Sign Up" and choose "Continue with GitHub"
-3. Once logged in, click "Add New..." → "Project"
-4. Find your `snow-gear-finder` repository
-5. Click "Import"
-6. Vercel will auto-detect it's a Vite project
-7. Click "Deploy"
-8. Wait 1-2 minutes ⏳
-9. Your app is LIVE! 🎉
-
-Vercel will give you a URL like: `snow-gear-finder.vercel.app`
-
-### Step 3: Add Your Custom Domain (Optional)
-
-1. Buy a domain from Namecheap, GoDaddy, etc.
-2. In Vercel, go to your project → Settings → Domains
-3. Add your domain and follow the DNS setup instructions
-
-## 💰 Setting Up Affiliate Links
-
-Before going live, replace the placeholder affiliate links in `src/App.jsx`:
-
-Find lines like:
-```javascript
-affiliate: 'https://affiliate-link-1.com'
+```
+src/
+  App.jsx                  # Main app component (all screens)
+  main.jsx                 # React entry point
+  index.css                # Tailwind imports
+  data/
+    questions.js           # Quiz questions and option labels
+  services/
+    googleSheets.js        # Fetches and caches product data from Google Sheets
+  utils/
+    helpers.js             # Recommendation engine, sizing, brand extraction
+public/
+  logo.png                 # App logo
+  snow-background.mp4      # Background video
 ```
 
-Replace with your actual affiliate tracking URLs from:
-- REI Affiliate Program
-- Backcountry.com
-- Evo.com
-- Amazon Associates
-- ShareASale
+## Product Data
 
-## 🛠️ Local Development
+Products are managed in a Google Sheets spreadsheet published as CSV. Each row includes brand, product name, sport, price, image URL, affiliate link, and matching criteria (levels, styles, terrains, budgets). Data is cached in localStorage for 1 hour.
 
-If you want to run the app locally:
+## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-## 📁 Project Structure
+## Deployment
 
-```
-snow-gear-finder/
-├── src/
-│   ├── App.jsx          # Main app component
-│   ├── main.jsx         # React entry point
-│   └── index.css        # Tailwind imports
-├── index.html           # HTML template
-├── package.json         # Dependencies
-├── vite.config.js       # Vite configuration
-├── tailwind.config.js   # Tailwind CSS config
-├── postcss.config.js    # PostCSS config
-└── README.md           # This file
-```
-
-## 🎯 Features
-
-- Interactive questionnaire (7 questions)
-- Personalized gear recommendations
-- Responsive design (works on mobile & desktop)
-- Affiliate link integration
-- Clean, modern UI with smooth animations
-
-## 📈 Next Steps
-
-1. **Analytics**: Add Google Analytics to track visitors
-2. **SEO**: Optimize meta tags for better search rankings
-3. **Content**: Add a blog for snowboard/ski buying guides
-4. **Social**: Share on Reddit (r/snowboarding, r/skiing)
-5. **A/B Testing**: Test different questionnaire flows
-
-## 🔒 Legal
-
-- Update affiliate disclosure if needed
-- Add Privacy Policy (use TermsFeed generator)
-- Add Terms of Service
-
-## 📝 License
-
-MIT License - feel free to modify and use!
+Pushes to `main` auto-deploy to Vercel at [green-room-gear-finder.vercel.app](https://green-room-gear-finder.vercel.app).
