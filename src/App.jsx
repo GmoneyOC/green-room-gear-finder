@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronRight, Mountain, Award, TrendingUp, DollarSign, ExternalLink, User, Ruler, Scale, RefreshCw, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Mountain, Award, TrendingUp, DollarSign, ExternalLink, User, Ruler, Scale, RefreshCw, Check, AlertTriangle, Info } from 'lucide-react';
 import { QUESTIONS } from './data/questions';
 import { getAnswerLabel, getRecommendations, getSizeRecommendation, extractBrands } from './utils/helpers';
 import { fetchProducts, getCachedProducts } from './services/googleSheets';
@@ -36,7 +36,7 @@ const App = () => {
     }
   }, [step]);
 
-  // BOTPRESS NATIVE INJECTION
+  // BOTPRESS NATIVE INJECTION (cleaned up - removed invalid additionalStylesheet)
   useEffect(() => {
     if (showChat && !document.getElementById('botpress-inject')) {
       const injectScript = document.createElement('script');
@@ -56,13 +56,8 @@ const App = () => {
           window.botpressWebChat.init({
             "configUrl": "https://files.bpcontent.cloud/2026/02/10/01/20260210012639-5UUL1MVZ.json",
             "showWidget": true,
-            "openByDefault": true, // FIXED: Added missing comma here
-            "botName": "Gear Finder Stevo",
-            "additionalStylesheet": `
-              .bpw-header-container { background: #1b4332 !important; border-bottom: 3px solid #ff6b00 !important; }
-              .bpw-from-user .bpw-chat-bubble { background-color: #ff6b00 !important; color: white !important; }
-              .bpw-floating-button { background: #ff6b00 !important; }
-            `
+            "openByDefault": true,
+            "botName": "Gear Finder Stevo"
           });
         }
       };
@@ -71,13 +66,27 @@ const App = () => {
 
   const loadProducts = async () => {
     setLoading(true);
+    setError(null);
     try {
       const cached = getCachedProducts();
-      if (cached) { setProducts(cached.products); setLoading(false); return; }
+      if (cached) {
+        setProducts(cached.products);
+        setLoading(false);
+        // If cache is expired, refresh in background
+        if (cached.isExpired) {
+          fetchProducts()
+            .then(data => setProducts(data))
+            .catch(err => console.warn('Background refresh failed:', err.message));
+        }
+        return;
+      }
       const data = await fetchProducts();
       setProducts(data);
       setLoading(false);
-    } catch (err) { setError(err.message); setLoading(false); }
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
   };
 
   const availableBrands = useMemo(() => products ? extractBrands(products) : { snowboarding: [], skiing: [] }, [products]);
@@ -88,7 +97,7 @@ const App = () => {
   }, [answers, products, step, brandMode, selectedBrands]);
 
   const topPicks = recommendations.slice(0, 3);
-  
+
   const secondaryBrandPicks = useMemo(() => {
     if (brandMode !== 'specific' || step !== 'results') return {};
     const topNames = topPicks.map(p => p.name);
@@ -110,6 +119,16 @@ const App = () => {
     else setStep('results');
   };
 
+  const handleBack = () => {
+    if (currentQuestion > 0) {
+      const prevQuestion = QUESTIONS[currentQuestion - 1];
+      const newAnswers = { ...answers };
+      delete newAnswers[prevQuestion.id];
+      setAnswers(newAnswers);
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
   const restartQuiz = () => {
     if (window.botpressWebChat && typeof window.botpressWebChat.sendEvent === 'function') {
       window.botpressWebChat.sendEvent({ type: 'hide' });
@@ -122,26 +141,49 @@ const App = () => {
     setShowChat(false);
   };
 
-  // FIXED BACKGROUND: Added pointer-events-none and used fixed positioning
+  // BACKGROUND: Video on desktop, static image on mobile
   const Background = ({ imageUrl }) => (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      <video 
-        autoPlay 
-        loop 
-        muted 
-        playsInline 
-        className="absolute w-full h-full object-cover" 
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute w-full h-full object-cover hidden md:block"
         poster={imageUrl}
       >
         <source src="/snow-background.mp4" type="video/mp4" />
-        <img src={imageUrl} className="w-full h-full object-cover" alt="bg" />
       </video>
+      <img src={imageUrl} className="absolute w-full h-full object-cover block md:hidden" alt="bg" />
       <div className="absolute inset-0 bg-blue-900/60 backdrop-blur-[2px] z-10"></div>
     </div>
   );
 
-  if (loading) return <div className="min-h-screen bg-blue-900 flex items-center justify-center text-white text-xl font-bold">LOADING GEAR...</div>;
+  // LOADING STATE
+  if (loading) return (
+    <div className="min-h-screen bg-blue-900 flex items-center justify-center text-white text-xl font-bold">
+      LOADING GEAR...
+    </div>
+  );
 
+  // ERROR STATE
+  if (error) return (
+    <div className="min-h-screen bg-blue-900 flex items-center justify-center text-white">
+      <div className="text-center max-w-md mx-auto px-6">
+        <AlertTriangle className="w-16 h-16 mx-auto mb-6 text-orange-400" />
+        <h2 className="text-2xl font-black mb-4 uppercase italic">Something Went Wrong</h2>
+        <p className="text-white/70 mb-8">{error}</p>
+        <button
+          onClick={loadProducts}
+          className="bg-white text-blue-900 px-8 py-4 rounded-full font-black text-lg shadow-2xl hover:bg-blue-50 transition-all active:scale-95 flex items-center gap-3 mx-auto"
+        >
+          <RefreshCw className="w-5 h-5" /> Try Again
+        </button>
+      </div>
+    </div>
+  );
+
+  // LANDING
   if (step === 'landing') return (
     <div className="min-h-screen text-white relative flex items-center justify-center overflow-hidden">
       <Background imageUrl="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80&fm=webp" />
@@ -155,11 +197,11 @@ const App = () => {
     </div>
   );
 
+  // BRAND SELECTION
   if (step === 'brandSelection') return (
     <div className="min-h-screen text-white relative flex flex-col">
       <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
-      
-      {/* FIXED STICKY HEADER: High z-index and removed flex-col parent restriction */}
+
       <div className="sticky top-0 z-50 bg-blue-900/90 backdrop-blur-md border-b border-white/20 p-6 shadow-2xl">
         <button onClick={() => setStep('questionnaire')} className="w-full max-w-2xl mx-auto bg-white text-blue-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl transition-transform active:scale-95">
           START FINDER ({selectedBrands.length} SELECTED) <ChevronRight strokeWidth={3} />
@@ -190,13 +232,28 @@ const App = () => {
     </div>
   );
 
+  // QUESTIONNAIRE WITH PROGRESS BAR + BACK BUTTON
   if (step === 'questionnaire') {
     const q = QUESTIONS[currentQuestion];
+    const progress = ((currentQuestion) / QUESTIONS.length) * 100;
     return (
       <div className="min-h-screen text-white relative flex items-center justify-center overflow-hidden">
         <Background imageUrl="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=1920&q=80&fm=webp" />
         <div className="max-w-2xl mx-auto px-6 py-16 relative z-20 w-full">
           <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-10 border border-white/20 shadow-2xl">
+            {/* Progress indicator */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm font-bold text-white/60 uppercase tracking-widest">Question {currentQuestion + 1} of {QUESTIONS.length}</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-2">
+                <div
+                  className="bg-white h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+
             <h2 className="text-4xl font-black mb-10 italic uppercase tracking-tighter leading-tight">{q.question}</h2>
             <div className="space-y-4">
               {q.options.map((opt) => (
@@ -205,12 +262,23 @@ const App = () => {
                 </button>
               ))}
             </div>
+
+            {/* Back button */}
+            {currentQuestion > 0 && (
+              <button
+                onClick={handleBack}
+                className="mt-6 flex items-center gap-2 text-white/60 hover:text-white font-bold transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" /> Back
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
+  // RESULTS
   if (step === 'results') return (
     <div className="min-h-screen text-white relative flex flex-col overflow-x-hidden">
       <Background imageUrl="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=80&fm=webp" />
@@ -219,6 +287,25 @@ const App = () => {
           <h1 className="text-6xl font-black mb-4 italic uppercase tracking-tighter">Your Setup</h1>
           <div className="h-2 w-24 bg-blue-500 mx-auto rounded-full"></div>
         </div>
+
+        {/* Size recommendation banner */}
+        {sizeRecommendation && (
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 mb-12 border border-white/20 flex items-center gap-4 max-w-2xl mx-auto">
+            <Ruler className="w-8 h-8 text-blue-300 flex-shrink-0" />
+            <div>
+              <p className="font-black text-lg uppercase italic">{sizeRecommendation}</p>
+              <p className="text-white/60 text-sm mt-1">Based on your height and weight</p>
+            </div>
+          </div>
+        )}
+
+        {/* Ski inventory note */}
+        {answers.sport === 'skiing' && (
+          <div className="bg-orange-500/20 backdrop-blur-xl rounded-2xl p-5 mb-12 border border-orange-400/30 flex items-center gap-4 max-w-2xl mx-auto">
+            <Info className="w-6 h-6 text-orange-300 flex-shrink-0" />
+            <p className="text-white/80 font-medium text-sm">Our ski inventory is growing â more options coming soon!</p>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-10 mb-20">
           {topPicks.map((product) => (
@@ -249,7 +336,7 @@ const App = () => {
                   </div>
                   <h3 className="text-xl font-black mb-1 italic uppercase">{product.name}</h3>
                   <p className="text-blue-300 font-black mb-6 text-2xl">{product.price}</p>
-                  <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-black text-white hover:text-blue-300 uppercase italic tracking-widest transition-colors">Shop Item →</a>
+                  <a href={product.affiliate} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-black text-white hover:text-blue-300 uppercase italic tracking-widest transition-colors">Shop Item â</a>
                 </div>
               ))}
             </div>
